@@ -1,0 +1,21 @@
+# Логи
+*.log
+logs/
+
+# Временные файлы
+*.tmp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Артефакты сборки / архивы деплоя
+dist/
+build/
+*.tar.gz
+*.zip
+
+# IDE и окружение
+.vscode/
+.idea/
+.env
