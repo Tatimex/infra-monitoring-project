@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ feature/monitoring ]
+  workflow_dispatch:
+
+jobs:
+  scripts:
+    name: Bash scripts check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Syntax check (bash -n)
+        run: |
+          bash -n check_api.sh
+          bash -n analyze_logs.sh
+          echo "Синтаксис скриптов корректен"
+
+      - name: Make scripts executable
+        run: chmod +x check_api.sh analyze_logs.sh
+
+      - name: Test check_api.sh (expect exit 0)
+        run: ./check_api.sh https://httpbin.org/status/200
+
+      - name: Test check_api.sh (expect exit 1 on 404)
+        run: |
+          if ./check_api.sh https://httpbin.org/status/404; then
+            echo "Ожидался код возврата 1"; exit 1
+          fi
+          echo "Ошибка корректно обнаружена"
+
+      - name: Run analyze_logs.sh
+        run: ./analyze_logs.sh
+
+  docker:
+    name: Docker Compose smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml
+        run: docker compose config -q
+
+      - name: Start stack
+        run: docker compose up -d
+
+      - name: Check proxy response
+        run: |
+          for i in $(seq 1 10); do
+            if curl -fs http://localhost:80 | grep -q "Monitoring Service Active"; then
+              echo "Прокси отвечает корректно"; exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs
+          exit 1
+
+      - name: Stop stack
+        if: always()
+        run: docker compose down
