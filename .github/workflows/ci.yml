@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   push:
     branches: [ feature/monitoring ]
+  workflow_dispatch:
 
 jobs:
   scripts:
