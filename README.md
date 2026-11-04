@@ -151,3 +151,7 @@ ssh -i ~/.ssh/deploy_key deploy@203.0.113.10 \
 - в `/etc/ssh/sshd_config` на сервере: `PasswordAuthentication no`, `PermitRootLogin no`;
 - права на ключ: `chmod 600 ~/.ssh/deploy_key`;
 - отдельный ключ под деплой, не основной личный.
+
+## Статус
+
+CI запускается на каждый Pull Request в `main`.
